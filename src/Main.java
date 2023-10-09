@@ -5,7 +5,7 @@ interface InputProvider {
     double getPercentage();
 }
 
-// Класс для ввода данных студента
+// Реализация ввода данных студента
 class StudentInput implements InputProvider {
     private Scanner scanner;
 
@@ -15,7 +15,7 @@ class StudentInput implements InputProvider {
 
     @Override
     public double getPercentage() {
-        System.out.print("Введите Regterm: ");
+        System.out.print("Введите процент: ");
         double percentage = scanner.nextDouble();
         return percentage;
     }
@@ -26,12 +26,12 @@ interface Calculator {
     double calculateRequiredPercentage(double inputPercentage);
 }
 
-// Класс для вычисления необходимого процента за Final
+// Реализация вычисления необходимого процента за Final
 class FinalExamCalculator implements Calculator {
     @Override
     public double calculateRequiredPercentage(double inputPercentage) {
         if (inputPercentage < 0 || inputPercentage > 100) {
-            throw new IllegalArgumentException("Ошибка: Процент должен быть в пределах 50-100.");
+            throw new IllegalArgumentException("Ошибка: Процент должен быть в пределах 0-100.");
         }
 
         double requiredFinalPercentage = 70.0;
@@ -50,11 +50,27 @@ interface OutputProvider {
     void displayResult(double requiredPercentage);
 }
 
-// Класс для вывода результата в консоль
+// Реализация вывода результата в консоль
 class ConsoleOutput implements OutputProvider {
     @Override
     public void displayResult(double requiredPercentage) {
         System.out.println("Студенту нужно набрать не менее " + requiredPercentage + "%.");
+    }
+}
+
+// Декоратор для логирования
+class LoggingDecorator implements Calculator {
+    private Calculator calculator;
+
+    public LoggingDecorator(Calculator calculator) {
+        this.calculator = calculator;
+    }
+
+    @Override
+    public double calculateRequiredPercentage(double inputPercentage) {
+        double result = calculator.calculateRequiredPercentage(inputPercentage);
+        System.out.println("Лог: Рассчитан необходимый процент: " + result);
+        return result;
     }
 }
 
@@ -65,6 +81,8 @@ public class Main {
         double inputPercentage = inputProvider.getPercentage();
 
         Calculator calculator = new FinalExamCalculator();
+        calculator = new LoggingDecorator(calculator); // Добавляем логирование
+
         double requiredPercentage = calculator.calculateRequiredPercentage(inputPercentage);
 
         OutputProvider outputProvider = new ConsoleOutput();
